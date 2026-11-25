@@ -78,6 +78,14 @@ class _TelaEstacionamentoState extends State<TelaEstacionamento> {
     );
   }
 
+  Widget _botaoCadastrar() {
+    return FilledButton.icon(
+      onPressed: () => _abrirFormulario(),
+      icon: const Icon(Icons.add),
+      label: const Text('Cadastrar veículo'),
+    );
+  }
+
   void _excluirRegistro(int indice) {
     final placaExcluida = _registros[indice].placa;
     setState(() => _registros.removeAt(indice));
@@ -94,48 +102,55 @@ class _TelaEstacionamentoState extends State<TelaEstacionamento> {
         centerTitle: true,
       ),
       body: _registros.isEmpty
-          ? const _MensagemListaVazia()
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: _registros.length,
-              separatorBuilder: (contexto, indice) =>
-                  const SizedBox(height: 8),
-              itemBuilder: (contexto, indice) {
-                final registro = _registros[indice];
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      child: Text(registro.vaga.toUpperCase()),
-                    ),
-                    title: Text(
-                      registro.placa,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      'Modelo: ${registro.modelo}\nVaga: ${registro.vaga}',
-                    ),
-                    isThreeLine: true,
-                    onTap: () => _abrirFormulario(indice: indice),
-                    trailing: IconButton(
-                      tooltip: 'Excluir veículo',
-                      onPressed: () => _excluirRegistro(indice),
-                      icon: const Icon(Icons.delete_outline),
-                    ),
+          ? _MensagemListaVazia(aoCadastrar: _botaoCadastrar)
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Center(child: _botaoCadastrar()),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _registros.length,
+                    separatorBuilder: (contexto, indice) =>
+                        const SizedBox(height: 8),
+                    itemBuilder: (contexto, indice) {
+                      final registro = _registros[indice];
+                      return Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Text(registro.vaga.toUpperCase()),
+                          ),
+                          title: Text(
+                            registro.placa,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            'Modelo: ${registro.modelo}\nVaga: ${registro.vaga}',
+                          ),
+                          isThreeLine: true,
+                          onTap: () => _abrirFormulario(indice: indice),
+                          trailing: IconButton(
+                            tooltip: 'Excluir veículo',
+                            onPressed: () => _excluirRegistro(indice),
+                            icon: const Icon(Icons.delete_outline),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _abrirFormulario(),
-        icon: const Icon(Icons.add),
-        label: const Text('Cadastrar veículo'),
-      ),
     );
   }
 }
 
 class _MensagemListaVazia extends StatelessWidget {
-  const _MensagemListaVazia();
+  const _MensagemListaVazia({required this.aoCadastrar});
+
+  final Widget Function() aoCadastrar;
 
   @override
   Widget build(BuildContext context) {
@@ -145,12 +160,6 @@ class _MensagemListaVazia extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.local_parking,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 16),
             Text(
               'Nenhum veículo cadastrado',
               style: Theme.of(context).textTheme.titleLarge,
@@ -161,6 +170,8 @@ class _MensagemListaVazia extends StatelessWidget {
               'Toque em “Cadastrar veículo” para adicionar o primeiro registro.',
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 24),
+            aoCadastrar(),
           ],
         ),
       ),
@@ -276,7 +287,9 @@ class _TelaFormularioEstacionamentoState
             FilledButton.icon(
               onPressed: _salvarRegistro,
               icon: const Icon(Icons.save_outlined),
-              label: Text(_estaEditando ? 'Salvar alterações' : 'Salvar veículo'),
+              label: Text(
+                _estaEditando ? 'Salvar alterações' : 'Salvar veículo',
+              ),
             ),
           ],
         ),
